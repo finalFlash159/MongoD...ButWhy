@@ -1,10 +1,16 @@
+import os
+
+from dotenv import load_dotenv
 from pymongo import MongoClient
 
-# replace <password> with your actual password
-MONGODB_URI = "mongodb+srv://myAtlasDBUser:<password>@myatlasclusteredu.7ezulr9.mongodb.net/?retryWrites=true&w=majority&appName=myAtlasClusterEDU"
+# Load environment variables from .env file
+load_dotenv()
+MONGODB_URI = os.environ["MONGODB_URI"]
 
 client = MongoClient(MONGODB_URI)
 
 # test connection
 for db in client.list_database_names():
     print(db)
+
+client.close()
