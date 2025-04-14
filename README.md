@@ -901,3 +901,1284 @@ Connection string bao gồm các thành phần sau:
 ```bash
 pip install 'pymongo[srv]'
 ```
+
+###  Insert
+
+### Finding documents
+```bash
+use <database>
+```
+
+```bash
+db.<collection>.find()
+```
+
+#### There are many ways to find document
+- { field: { `$eq`:  < value > } }
+- {field: < value > }
+```bash
+db.zips.find({ state: "AZ"})
+```
+
+- `$in` operator
+```
+db.<collection>.find({
+	<field> : { $in:
+		[<value>, <value>, ...]
+	}
+})
+```
+
+### Comparision operators
+# MongoDB Query Operators
+
+| Name | Description |
+| --- | --- |
+| `$eq` | Matches values that are equal to a specified value. |
+| `$gt` | Matches values that are greater than a specified value. |
+| `$gte` | Matches values that are greater than or equal to a specified value. |
+| `$in` | Matches any of the values specified in an array. |
+| $lt` | Matches values that are less than a specified value. |
+| `$lte` | Matches values that are less than or equal to a specified value. |
+| `$ne` | Matches all values that are not equal to a specified value. |
+| `$nin` | Matches none of the values specified in an array. |
+
+
+```bash
+<field> : { <operator> : <value> }
+```
+
+ ### Query on arraay elements
+
+ `$eleMatch`
+
+ ```bash
+db.account.find({
+	products: {
+		$eleMatch: {$eq: "InvestmentStock"}
+		}
+	})
+```
+
+**Use the $elemMatch operator to find all documents that contain the specified subdocument. For example:**
+
+
+```
+db.sales.find({
+  items: {
+    $elemMatch: { name: "laptop", price: { $gt: 800 }, quantity: { $gte: 1 } },
+  },
+})
+```
+
+### Logical operators
+- `$and`
+- `$or`
+
+Use implicit $and to select documents that match multiple expressions. For example:
+```bash
+db.routes.find({ "airline.name": "Southwest Airlines", stops: { $gte: 1 } })
+```
+
+Use the $or operator to select documents that match at least one of the included expressions. For example:
+
+```bash
+db.routes.find({
+  $or: [{ dst_airport: "SEA" }, { src_airport: "SEA" }],
+})
+```
+
+Use the $and operator to use multiple $or expressions in your query.
+
+```bash
+db.routes.find({
+  $and: [
+    { $or: [{ dst_airport: "SEA" }, { src_airport: "SEA" }] },
+    { $or: [{ "airline.name": "American Airlines" }, { airplane: 320 }] },
+  ]
+})
+```
+
+### Replacing a Document in MongoDB
+Replacing a Document in MongoDB
+To replace documents in MongoDB, we use the `replaceOne()` method. The `replaceOne()` method takes the following parameters:
+* `filter`: A query that matches the document to replace.
+* `replacement`: The new document to replace the old one with.
+* `options`: An object that specifies options for the update.
+In the previous video, we use the `_id` field to filter the document. In our replacement document, we provide the entire document that should be inserted in its place. Here's the example code from the video:
+
+```bash
+db.books.replaceOne(
+  {
+    _id: ObjectId("6282afeb441a74a98dbbec4e"),
+  },
+  {
+    title: "Data Science Fundamentals for Python and MongoDB",
+    isbn: "1484235967",
+    publishedDate: new Date("2018-5-10"),
+    thumbnailUrl:
+      "https://m.media-amazon.com/images/I/71opmUBc2wL._AC_UY218_.jpg",
+    authors: ["David Paper"],
+    categories: ["Data Science"],
+  }
+)
+```
+
+### Updating MongoDB Documents by Using `updateOne()`
+The `updateOne()` method accepts a filter document, an update document, and an optional options object. MongoDB provides update operators and options to help you update documents. In this section, we'll cover three of them: `$set`, `upsert`, and `$push`.
+`$set`
+The `$set` operator replaces the value of a field with the specified value, as shown in the following code:
+
+```bash
+db.podcasts.updateOne(
+  {
+    _id: ObjectId("5e8f8f8f8f8f8f8f8f8f8f8"),
+  },
+
+  {
+    $set: {
+      subscribers: 98562,
+    },
+  }
+)
+```
+
+`upsert`
+The `upsert` option creates a new document if no documents match the filtered criteria. Here's an example:
+
+```bash
+db.podcasts.updateOne(
+  { title: "The Developer Hub" },
+  { $set: { topics: ["databases", "MongoDB"] } },
+  { upsert: true }
+)
+```
+
+`$push`
+The `$push` operator adds a new value to the `hosts` array field. Here's an example:
+
+```bash
+db.podcasts.updateOne(
+  { _id: ObjectId("5e8f8f8f8f8f8f8f8f8f8f8") },
+  { $push: { hosts: "Nic Raboy" } }
+)
+```
+
+### Updating MongoDB Documents by Using `findAndModify()`
+The `findAndModify()` method is used to find and replace a single document in MongoDB. It accepts a filter document, a replacement document, and an optional options object. The following code shows an example:
+
+```bash
+db.podcasts.findAndModify({
+  query: { _id: ObjectId("6261a92dfee1ff300dc80bf1") },
+  update: { $inc: { subscribers: 1 } },
+  new: true,
+})
+```
+
+### Updating MongoDB Documents by Using `updateMany()`
+To update multiple documents, use the `updateMany()` method. This method accepts a filter document, an update document, and an optional options object. The following code shows an example:
+
+```
+db.books.updateMany(
+  { publishedDate: { $lt: new Date("2019-01-01") } },
+  { $set: { status: "LEGACY" } }
+)
+```
+
+
+### Deleting Documents in MongoDB
+To delete documents, use the deleteOne() or deleteMany() methods. Both methods accept a filter document and an options object.
+
+#### Delete One Document
+The following code shows an example of the deleteOne() method:
+```bash
+db.podcasts.deleteOne({ _id: Objectid("6282c9862acb966e76bbf20a") })
+```
+#### Delete Many Documents
+The following code shows an example of the deleteMany() method:
+```bash
+db.podcasts.deleteMany({category: “crime”})
+```
+
+## MongoDB Operations Summary
+
+### ✅ Document Updates and Modifications
+
+- **Replaced a document**  
+  Sử dụng `db.collection.replaceOne()` để thay thế toàn bộ một document.
+
+- **Updated a specific field**  
+  Sử dụng toán tử `$set` trong `db.collection.updateOne()` để cập nhật giá trị của một trường cụ thể.
+
+- **Added a value to an array**  
+  Sử dụng toán tử `$push` trong `db.collection.updateOne()` để thêm một giá trị mới vào mảng trong document.
+
+- **Upsert operation**  
+  Sử dụng tùy chọn `upsert` trong `db.collection.updateOne()` để thêm mới document nếu chưa tồn tại, hoặc cập nhật nếu đã tồn tại.
+
+- **Find and modify a document**  
+  Sử dụng `db.collection.findAndModify()` để tìm và đồng thời sửa đổi một document.
+
+- **Update multiple documents**  
+  Sử dụng `db.collection.updateMany()` để cập nhật nhiều document cùng lúc.
+
+### ❌ Document Deletion
+
+- **Delete a document**  
+  Sử dụng `db.collection.deleteOne()` để xóa một document khỏi collection.
+
+
+## Sắp xếp và Giới hạn Kết quả Truy vấn trong MongoDB
+
+### Sắp xếp Kết quả (Sorting Results)
+
+Để sắp xếp kết quả truy vấn theo một thứ tự nhất định, sử dụng phương thức `cursor.sort()`. Trong dấu ngoặc của `sort()`, truyền vào một object chỉ định các trường (field) cần sắp xếp và thứ tự sắp xếp. Sử dụng giá trị `1` để sắp xếp **tăng dần** (ascending) và `-1` để sắp xếp **giảm dần** (descending).
+
+#### Cú pháp:
+```javascript
+db.collection.find(<query>).sort(<sort>)
+```
+
+#### Ví dụ:
+```javascript
+// Lấy dữ liệu tất cả công ty thuộc lĩnh vực âm nhạc, sắp xếp theo tên từ A đến Z.
+db.companies.find({ category_code: "music" }).sort({ name: 1 });
+```
+
+Để đảm bảo kết quả trả về có thứ tự nhất quán, nên bao gồm một trường chứa giá trị duy nhất (unique) trong `sort`. Một cách đơn giản là thêm trường `_id` vào `sort`.
+
+#### Ví dụ:
+```javascript
+// Lấy dữ liệu tất cả công ty âm nhạc, sắp xếp theo tên từ A đến Z, đảm bảo thứ tự nhất quán.
+db.companies.find({ category_code: "music" }).sort({ name: 1, _id: 1 });
+```
+
+### Giới hạn Kết quả (Limiting Results)
+
+Để giới hạn số lượng tài liệu (document) được trả về, sử dụng phương thức `cursor.limit()`. Trong dấu ngoặc của `limit()`, chỉ định số lượng tài liệu tối đa cần trả về.
+
+#### Cú pháp:
+```javascript
+db.companies.find(<query>).limit(<number>)
+```
+
+#### Ví dụ:
+```javascript
+// Lấy 3 công ty âm nhạc có số lượng nhân viên cao nhất, đảm bảo thứ tự nhất quán.
+db.companies
+  .find({ category_code: "music" })
+  .sort({ number_of_employees: -1, _id: 1 })
+  .limit(3);
+```
+
+## Trả về Dữ liệu Cụ thể từ Truy vấn trong MongoDB
+
+### Thêm Projection Document
+
+Để chỉ định các trường (field) muốn bao gồm hoặc loại trừ trong tập hợp kết quả, thêm một **projection document** làm tham số thứ hai trong lệnh `db.collection.find()`.
+
+#### Cú pháp:
+```javascript
+db.collection.find(<query>, <projection>)
+```
+
+### Bao gồm một Trường (Include a Field)
+
+Để bao gồm một trường cụ thể trong kết quả, đặt giá trị của trường đó là `1` trong **projection document**.
+
+#### Cú pháp:
+```javascript
+db.collection.find(<query>, { <field>: 1 })
+```
+
+#### Ví dụ:
+```javascript
+// Trả về tất cả các cuộc kiểm tra nhà hàng - chỉ lấy trường business_name, result và _id
+db.inspections.find(
+  { sector: "Restaurant - 818" },
+  { business_name: 1, result: 1 }
+)
+```
+
+### Loại trừ một Trường (Exclude a Field)
+
+Để loại trừ một trường khỏi kết quả, đặt giá trị của trường đó là `0` trong **projection document**.
+
+#### Cú pháp:
+```javascript
+db.collection.find(<query>, { <field>: 0, <field>: 0 })
+```
+
+#### Ví dụ:
+```javascript
+// Trả về tất cả các cuộc kiểm tra có kết quả "Pass" hoặc "Warning" - loại trừ trường date và zip code
+db.inspections.find(
+  { result: { $in: ["Pass", "Warning"] } },
+  { date: 0, "address.zip": 0 }
+)
+```
+
+#### Lưu ý:
+- Trường `_id` được bao gồm mặc định trong kết quả. Tuy nhiên, bạn có thể loại bỏ nó bằng cách đặt giá trị của `_id` là `0` trong **projection document**.
+
+#### Ví dụ:
+```javascript
+// Trả về tất cả các cuộc kiểm tra nhà hàng - chỉ lấy trường business_name và result, loại bỏ _id
+db.inspections.find(
+  { sector: "Restaurant - 818" },
+  { business_name: 1, result: 1, _id: 0 }
+)
+```
+
+## Đếm Số Lượng Tài Liệu trong Một Collection của MongoDB
+
+### Đếm Tài Liệu (Count Documents)
+
+Để đếm số lượng tài liệu (document) khớp với một truy vấn, sử dụng phương thức `db.collection.countDocuments()`. Phương thức này nhận hai tham số: một **query document** và một **options document**.
+
+#### Cú pháp:
+```javascript
+db.collection.countDocuments(<query>, <options>)
+```
+
+- **query**: Chỉ định các tài liệu cần được đếm.
+
+#### Ví dụ:
+```javascript
+// Đếm tổng số tài liệu trong collection trips
+db.trips.countDocuments({})
+```
+
+```javascript
+// Đếm số chuyến đi kéo dài trên 120 phút của người dùng loại "Subscriber"
+db.trips.countDocuments({ tripduration: { $gt: 120 }, usertype: "Subscriber" })
+```
+
+# Giới thiệu về Aggregation trong MongoDB
+
+Phần này bao gồm các định nghĩa quan trọng và ví dụ về một **aggregation pipeline** trong MongoDB.
+
+## Định nghĩa
+
+- **Aggregation**: Quá trình thu thập và tóm tắt dữ liệu.
+- **Stage**: Một phương thức tích hợp sẵn được thực hiện trên dữ liệu, nhưng không thay đổi dữ liệu vĩnh viễn.
+- **Aggregation pipeline**: Một chuỗi các **stage** được thực hiện trên dữ liệu theo thứ tự.
+
+## Cấu trúc của Aggregation Pipeline
+
+```javascript
+db.collection.aggregate([
+    {
+        $stage1: {
+            { expression1 },
+            { expression2 }...
+        }
+    },
+    {
+        $stage2: {
+            { expression1 }...
+        }
+    }
+])
+```
+
+## Sử dụng $match và $group trong Aggregation Pipeline
+
+### $match
+
+**$match** lọc các tài liệu (document) dựa trên các điều kiện được chỉ định.
+
+```javascript
+{
+    $match: {
+        "field_name": "value"
+    }
+}
+```
+
+### $group
+
+**$group** nhóm các tài liệu theo một **group key**.
+
+```javascript
+{
+    $group: {
+        _id: <expression>, // Group key
+        <field>: { <accumulator>: <expression> }
+    }
+}
+```
+
+### Ví dụ $match và $group
+
+Pipeline dưới đây tìm các tài liệu có trường `state` là `"CA"`, sau đó nhóm các tài liệu theo `city` và đếm tổng số mã zip trong bang California.
+
+```javascript
+db.zips.aggregate([
+    {
+        $match: {
+            state: "CA"
+        }
+    },
+    {
+        $group: {
+            _id: "$city",
+            totalZips: { $count: {} }
+        }
+    }
+])
+```
+
+## Sử dụng $sort và $limit trong Aggregation Pipeline
+
+### $sort
+
+**$sort** sắp xếp tất cả tài liệu đầu vào và trả về theo thứ tự đã sắp xếp. Sử dụng `1` cho thứ tự **tăng dần** và `-1` cho thứ tự **giảm dần**.
+
+```javascript
+{
+    $sort: {
+        "field_name": 1
+    }
+}
+```
+
+### $limit
+
+**$limit** giới hạn số lượng tài liệu trả về.
+
+```javascript
+{
+    $limit: 5
+}
+```
+
+### Ví dụ $sort và $limit
+
+Pipeline dưới đây sắp xếp các tài liệu theo trường `pop` theo thứ tự giảm dần (giá trị lớn nhất trước) và giới hạn kết quả chỉ trả về 5 tài liệu đầu tiên.
+
+```javascript
+db.zips.aggregate([
+    {
+        $sort: {
+            pop: -1
+        }
+    },
+    {
+        $limit: 5
+    }
+])
+```
+
+## Sử dụng $project, $count và $set trong Aggregation Pipeline
+
+### $project
+
+**$project** chỉ định các trường sẽ xuất hiện trong tài liệu đầu ra. Giá trị `1` để bao gồm trường, `0` để loại bỏ trường. Trường cũng có thể được gán giá trị mới.
+
+```javascript
+{
+    $project: {
+        state: 1,
+        zip: 1,
+        population: "$pop",
+        _id: 0
+    }
+}
+```
+
+### $set
+
+**$set** tạo các trường mới hoặc thay đổi giá trị của các trường hiện có, sau đó trả về tài liệu với các trường mới.
+
+```javascript
+{
+    $set: {
+        place: {
+            $concat: ["$city", ",", "$state"]
+        },
+        pop: 10000
+    }
+}
+```
+
+### $count
+
+**$count** tạo một tài liệu mới, chứa số lượng tài liệu tại thời điểm đó trong pipeline, gán vào tên trường được chỉ định.
+
+```javascript
+{
+    $count: "total_zips"
+}
+```
+
+## $out trong Aggregation
+
+### Định nghĩa
+
+**$out** ghi các tài liệu được trả về bởi pipeline vào một collection được chỉ định. Bạn có thể chỉ định cả database đầu ra.
+
+- **$out** phải là **stage cuối cùng** trong pipeline.
+- **$out** cho phép aggregation framework trả về tập hợp kết quả với bất kỳ kích thước nào.
+
+### Cảnh báo
+
+Nếu collection được chỉ định bởi **$out** đã tồn tại, **$out** sẽ thay thế hoàn toàn collection hiện tại bằng collection kết quả mới sau khi aggregation hoàn tất.
+
+### Cú pháp
+
+- Chỉ định collection đầu ra (trong cùng database):
+
+```javascript
+{ $out: "<output-collection>" }
+```
+
+- Chỉ định cả database và collection đầu ra:
+
+```javascript
+{ $out: { db: "<output-db>", coll: "<output-collection>" } }
+```
+
+- Từ MongoDB 7.0.3 và 7.1, hỗ trợ ghi vào time series collection:
+
+```javascript
+{
+    $out: {
+        db: "<output-db>",
+        coll: "<output-collection>",
+        timeseries: {
+            timeField: "<field-name>",
+            metaField: "<field-name>",
+            granularity: "seconds" || "minutes" || "hours"
+        }
+    }
+}
+```
+
+### Lưu ý quan trọng
+
+- **Thay đổi Granularity của Time Series**: Sau khi tạo time series collection, bạn có thể sửa đổi **granularity** bằng phương thức `collMod`. Tuy nhiên, bạn chỉ có thể tăng khoảng thời gian bao phủ bởi mỗi bucket, không thể giảm nó.
+
+# Làm việc với Index trong MongoDB
+
+## Tạo Index trên Một Trường (Single Field Index)
+
+Sử dụng `createIndex()` để tạo một index mới trong một collection. Trong dấu ngoặc của `createIndex()`, truyền vào một object chứa trường (field) và thứ tự sắp xếp.
+
+```javascript
+db.customers.createIndex({
+    birthdate: 1
+})
+```
+
+### Tạo Index Độc nhất trên Một Trường (Unique Single Field Index)
+
+Thêm `{ unique: true }` làm tham số thứ hai (tùy chọn) trong `createIndex()` để đảm bảo giá trị của trường index là duy nhất. Sau khi index độc nhất được tạo, mọi thao tác chèn hoặc cập nhật có giá trị trùng lặp trong trường index sẽ thất bại.
+
+```javascript
+db.customers.createIndex({
+    email: 1
+}, {
+    unique: true
+})
+```
+
+**Lưu ý**: MongoDB chỉ tạo index độc nhất nếu không có giá trị trùng lặp trong các trường được chọn làm index.
+
+### Xem Các Index trong Collection
+
+Sử dụng `getIndexes()` để xem tất cả các index đã được tạo trong một collection.
+
+```javascript
+db.customers.getIndexes()
+```
+
+### Kiểm tra Index được Sử dụng trong Truy vấn
+
+Sử dụng `explain()` khi thực hiện một truy vấn để xem **Execution Plan**. Kế hoạch này cung cấp chi tiết về các giai đoạn thực thi (IXSCAN, COLLSCAN, FETCH, SORT, v.v.):
+
+- **IXSCAN**: Truy vấn sử dụng một index và hiển thị index được chọn.
+- **COLLSCAN**: Thực hiện quét toàn bộ collection, không sử dụng index.
+- **FETCH**: Đọc tài liệu từ collection.
+- **SORT**: Sắp xếp tài liệu trong bộ nhớ.
+
+```javascript
+db.customers.explain().find({
+    birthdate: {
+        $gt: ISODate("1995-08-01")
+    }
+})
+```
+
+```javascript
+db.customers.explain().find({
+    birthdate: {
+        $gt: ISODate("1995-08-01")
+    }
+}).sort({
+    email: 1
+})
+```
+
+## Hiểu về Multikey Index
+
+Nếu một index trên một trường đơn hoặc index ghép (compound) bao gồm một trường dạng mảng (array), thì index đó là **multikey index**.
+
+### Tạo Multikey Index trên Một Trường
+
+Sử dụng `createIndex()` để tạo index trên một trường mảng. Trong ví dụ này, `accounts` là một trường mảng.
+
+```javascript
+db.customers.createIndex({
+    accounts: 1
+})
+```
+
+### Xem Các Index trong Collection
+
+Sử dụng `getIndexes()` để xem tất cả các index đã được tạo.
+
+```javascript
+db.customers.getIndexes()
+```
+
+### Kiểm tra Index được Sử dụng trong Truy vấn
+
+Sử dụng `explain()` để kiểm tra **Execution Plan** của truy vấn:
+
+```javascript
+db.customers.explain().find({
+    accounts: 627788
+})
+```
+
+## Làm việc với Compound Index
+
+### Tạo Compound Index
+
+Sử dụng `createIndex()` để tạo index trên hai hoặc nhiều trường. Trong dấu ngoặc của `createIndex()`, truyền vào một object chứa các trường và thứ tự sắp xếp.
+
+```javascript
+db.customers.createIndex({
+    active: 1,
+    birthdate: -1,
+    name: 1
+})
+```
+
+### Thứ tự các Trường trong Compound Index
+
+Thứ tự các trường và thứ tự sắp xếp rất quan trọng. Nên liệt kê các trường theo thứ tự sau: **Equality**, **Sort**, và **Range**.
+
+- **Equality**: Trường khớp với một giá trị duy nhất trong truy vấn.
+- **Sort**: Trường được dùng để sắp xếp kết quả.
+- **Range**: Trường được lọc trong một khoảng giá trị hợp lệ.
+
+Ví dụ truy vấn sau bao gồm một phép khớp **equality** trên trường `active`, sắp xếp theo `birthdate` (giảm dần) và `name` (tăng dần), đồng thời lọc khoảng trên `birthdate`:
+
+```javascript
+db.customers.find({
+    birthdate: {
+        $gte: ISODate("1977-01-01")
+    },
+    active: true
+}).sort({
+    birthdate: -1,
+    name: 1
+})
+```
+
+Index hiệu quả cho truy vấn này:
+
+```javascript
+db.customers.createIndex({
+    active: 1,
+    birthdate: -1,
+    name: 1
+})
+```
+
+### Xem Các Index trong Collection
+
+Sử dụng `getIndexes()` để xem tất cả các index.
+
+```javascript
+db.customers.getIndexes()
+```
+
+### Kiểm tra Index được Sử dụng trong Truy vấn
+
+Sử dụng `explain()` để xem **Execution Plan**:
+
+```javascript
+db.customers.explain().find({
+    birthdate: {
+        $gte: ISODate("1977-01-01")
+    },
+    active: true
+}).sort({
+    birthdate: -1,
+    name: 1
+})
+```
+
+### Phủ toàn bộ Truy vấn bằng Index (Cover a Query)
+
+Một index **phủ** (cover) một truy vấn khi MongoDB không cần lấy dữ liệu từ bộ nhớ vì tất cả dữ liệu cần thiết đã được index trả về.
+
+Sử dụng **projection** để chỉ trả về các trường cần thiết, đảm bảo các trường này nằm trong index. Ví dụ, thêm projection `{ name: 1, birthdate: 1, _id: 0 }` để giới hạn kết quả chỉ chứa `name` và `birthdate`:
+
+```javascript
+db.customers.explain().find({
+    birthdate: {
+        $gte: ISODate("1977-01-01")
+    },
+    active: true
+}, {
+    name: 1,
+    birthdate: 1,
+    _id: 0
+}).sort({
+    birthdate: -1,
+    name: 1
+})
+```
+
+**Execution Plan** sẽ hiển thị:
+
+- **IXSCAN**: Quét index ghép.
+- **PROJECTION_COVERED**: Tất cả thông tin cần thiết được trả về bởi index, không cần lấy từ bộ nhớ.
+
+## Xóa Index
+
+### Xem Các Index trong Collection
+
+Sử dụng `getIndexes()` để xem tất cả các index. Mọi collection luôn có một index mặc định trên trường `_id`, được MongoDB sử dụng nội bộ và không thể xóa.
+
+```javascript
+db.customers.getIndexes()
+```
+
+### Xóa Một Index
+
+Sử dụng `dropIndex()` để xóa một index hiện có. Trong dấu ngoặc của `dropIndex()`, truyền vào một object đại diện cho khóa index hoặc cung cấp tên index dưới dạng chuỗi.
+
+Xóa index theo tên:
+
+```javascript
+db.customers.dropIndex("active_1_birthdate_-1_name_1")
+```
+
+Xóa index theo khóa:
+
+```javascript
+db.customers.dropIndex({
+    active: 1,
+    birthdate: -1,
+    name: 1
+})
+```
+
+### Xóa Nhiều Index
+
+Sử dụng `dropIndexes()` để xóa tất cả các index trong collection, ngoại trừ index mặc định trên `_id`.
+
+```javascript
+db.customers.dropIndexes()
+```
+
+`dropIndexes()` cũng có thể nhận một mảng tên index để xóa một danh sách index cụ thể:
+
+```javascript
+db.collection.dropIndexes([
+    "index1name",
+    "index2name",
+    "index3name"
+])
+```
+
+# Sử dụng $search và Facets trong MongoDB Atlas Search
+
+## Sử dụng $search với Compound Operators
+
+Toán tử **compound** trong giai đoạn `$search` cho phép cân nhắc mức độ quan trọng của các trường khác nhau và lọc kết quả mà không cần tạo thêm các giai đoạn aggregation. Có bốn tùy chọn cho toán tử **compound**: `must`, `mustNot`, `should`, và `filter`.
+
+- **`must`**: Loại trừ các bản ghi không đáp ứng tiêu chí.
+- **`mustNot`**: Loại trừ các bản ghi đáp ứng tiêu chí.
+- **`should`**: Cho phép ưu tiên các bản ghi đáp ứng tiêu chí để xuất hiện đầu tiên.
+- **`filter`**: Loại bỏ các bản ghi không đáp ứng tiêu chí.
+
+### Ví dụ về $search với Compound Operators
+
+```javascript
+{
+    $search: {
+        "compound": {
+            "must": [{
+                "text": {
+                    "query": "field",
+                    "path": "habitat"
+                }
+            }],
+            "should": [{
+                "range": {
+                    "gte": 45,
+                    "path": "wingspan_cm",
+                    "score": { "constant": { "value": 5 } }
+                }
+            }]
+        }
+    }
+}
+```
+
+## Nhóm Kết quả Tìm kiếm bằng Facets
+
+### $searchMeta và facet
+
+**$searchMeta** là một giai đoạn aggregation trong Atlas Search, hiển thị siêu dữ liệu (metadata) liên quan đến tìm kiếm. Khi kết quả tìm kiếm được chia thành các nhóm (buckets) bằng **facet**, thông tin về các nhóm này sẽ được hiển thị trong giai đoạn `$searchMeta`, vì chúng phản ánh cách kết quả tìm kiếm được định dạng.
+
+### Ví dụ về $searchMeta với facet
+
+```javascript
+{
+    $searchMeta: {
+        "facet": {
+            "operator": {
+                "text": {
+                    "query": ["Northern Cardinal"],
+                    "path": "common_name"
+                }
+            },
+            "facets": {
+                "sightingWeekFacet": {
+                    "type": "date",
+                    "path": "sighting",
+                    "boundaries": [
+                        ISODate("2022-01-01"),
+                        ISODate("2022-01-08"),
+                        ISODate("2022-01-15"),
+                        ISODate("2022-01-22")
+                    ],
+                    "default": "other"
+                }
+            }
+        }
+    }
+}
+```
+
+### Giải thích
+
+- **`facet`**: Toán tử trong `$searchMeta`, xác định cách chia kết quả thành các nhóm (buckets).
+- **`operator`**: Chỉ định truy vấn tìm kiếm (search query).
+- **`facets`**: Định nghĩa các nhóm (buckets) cho facet, ví dụ như nhóm theo ngày trong trường `sighting`.
+
+# ACID Transactions trong MongoDB
+
+## Điểm chính
+- **ACID** là viết tắt của Atomicity, Consistency, Isolation, và Durability, đảm bảo các giao dịch cơ sở dữ liệu được xử lý đáng tin cậy.
+- MongoDB hỗ trợ các giao dịch ACID, đặc biệt là giao dịch đa tài liệu từ phiên bản 4.0, phù hợp cho các ứng dụng cần tính toàn vẹn dữ liệu.
+- Giao dịch trong MongoDB có thể hoạt động trên nhiều tài liệu, bộ sưu tập, và thậm chí cả các cụm phân tán, nhưng cần được sử dụng cẩn thận để tránh ảnh hưởng đến hiệu suất.
+- Các phương pháp như nhúng dữ liệu hoặc sử dụng trigger có thể là lựa chọn thay thế trong một số trường hợp để giảm chi phí hiệu suất.
+
+### Tổng quan
+ACID transactions là một tập hợp các thuộc tính giúp đảm bảo rằng các thao tác cơ sở dữ liệu, như chuyển tiền hoặc cập nhật kho, được thực hiện một cách an toàn và đáng tin cậy. Trong MongoDB, một cơ sở dữ liệu NoSQL, các giao dịch này cho phép bạn thực hiện nhiều thao tác trên các tài liệu khác nhau mà vẫn đảm bảo dữ liệu không bị hỏng hoặc không nhất quán.
+
+### Cách MongoDB xử lý
+MongoDB, từ phiên bản 4.0, đã giới thiệu hỗ trợ cho các giao dịch đa tài liệu, nghĩa là bạn có thể thực hiện các thao tác trên nhiều tài liệu và bộ sưu tập trong một giao dịch duy nhất. Ví dụ, khi chuyển tiền từ tài khoản này sang tài khoản khác, cả hai thao tác (trừ tiền và cộng tiền) sẽ được thực hiện cùng nhau hoặc không thực hiện gì cả.
+
+### Khi nào nên sử dụng
+Giao dịch ACID trong MongoDB rất hữu ích cho các ứng dụng như ngân hàng, thương mại điện tử, hoặc quản lý kho, nơi dữ liệu cần được cập nhật đồng thời ở nhiều nơi. Tuy nhiên, vì chúng có thể làm chậm hiệu suất, bạn nên cân nhắc sử dụng các phương pháp khác, như nhúng dữ liệu vào một tài liệu duy nhất, nếu có thể.
+
+---
+
+# Báo cáo chi tiết về ACID Transactions trong MongoDB
+
+## Giới thiệu
+ACID là viết tắt của **Atomicity** (Tính nguyên tử), **Consistency** (Tính nhất quán), **Isolation** (Tính cô lập), và **Durability** (Tính bền vững). Những thuộc tính này đảm bảo rằng các giao dịch cơ sở dữ liệu được xử lý một cách đáng tin cậy, ngay cả khi xảy ra lỗi hoặc sự cố hệ thống. MongoDB, một cơ sở dữ liệu NoSQL định hướng tài liệu, hỗ trợ các giao dịch ACID, đặc biệt là các giao dịch đa tài liệu từ phiên bản 4.0, giúp các nhà phát triển xây dựng các ứng dụng yêu cầu tính toàn vẹn dữ liệu cao.
+
+## Các thuộc tính ACID trong MongoDB
+
+### Atomicity (Tính nguyên tử)
+- **Định nghĩa**: Đảm bảo rằng tất cả các thao tác trong một giao dịch được coi là một đơn vị duy nhất, hoặc tất cả thành công hoặc tất cả thất bại.
+- **Trong MongoDB**: 
+  - Các thao tác ghi trên một tài liệu duy nhất luôn có tính nguyên tử.
+  - Đối với giao dịch đa tài liệu, MongoDB đảm bảo rằng tất cả các thay đổi được thực hiện hoặc bị hủy bỏ cùng nhau, duy trì tính toàn vẹn dữ liệu trên nhiều tài liệu, bộ sưu tập, bộ sao chép (replica sets), và cụm phân tán (sharded clusters).
+  - Ví dụ: Khi chuyển 1000 đồng từ tài khoản A sang tài khoản B, cả hai thao tác (trừ tiền từ A và cộng tiền vào B) sẽ được thực hiện hoặc không thực hiện gì cả.
+
+### Consistency (Tính nhất quán)
+- **Định nghĩa**: Đảm bảo rằng một giao dịch đưa cơ sở dữ liệu từ một trạng thái hợp lệ sang một trạng thái hợp lệ khác, tuân thủ các quy tắc và ràng buộc đã định nghĩa.
+- **Trong MongoDB**: 
+  - MongoDB cung cấp sự linh hoạt trong mô hình dữ liệu, cho phép nhà phát triển lựa chọn giữa việc chuẩn hóa dữ liệu trên nhiều bộ sưu tập hoặc nhúng dữ liệu liên quan vào một tài liệu duy nhất.
+  - Trong các giao dịch đa tài liệu, tính nhất quán được duy trì bằng cách đảm bảo rằng tất cả các thao tác trong giao dịch tuân thủ các quy tắc và ràng buộc của ứng dụng.
+  - Ví dụ: Nếu một giao dịch cập nhật số dư tài khoản và lịch sử giao dịch, MongoDB đảm bảo rằng cả hai đều được cập nhật chính xác hoặc không thay đổi gì.
+
+### Isolation (Tính cô lập)
+- **Định nghĩa**: Đảm bảo rằng các giao dịch đồng thời không can thiệp lẫn nhau, ngăn chặn việc một giao dịch nhìn thấy trạng thái trung gian của giao dịch khác.
+- **Trong MongoDB**: 
+  - MongoDB sử dụng **snapshot isolation** cho các giao dịch, nghĩa là mỗi giao dịch hoạt động trên một bản chụp (snapshot) của dữ liệu tại thời điểm bắt đầu giao dịch, không thấy các thay đổi từ các giao dịch khác đang chạy đồng thời.
+  - Điều này giúp tránh các vấn đề như đọc bẩn (dirty reads) hoặc đọc không lặp lại (non-repeatable reads).
+  - Ví dụ: Nếu hai giao dịch cùng cố gắng cập nhật số dư tài khoản, chúng sẽ không xung đột vì mỗi giao dịch hoạt động trên một bản chụp riêng.
+
+### Durability (Tính bền vững)
+- **Định nghĩa**: Đảm bảo rằng một khi giao dịch được xác nhận (committed), nó sẽ được lưu trữ vĩnh viễn, ngay cả khi xảy ra sự cố hệ thống.
+- **Trong MongoDB**: 
+  - MongoDB đạt được tính bền vững thông qua cơ chế ghi trước (write-ahead logging), cụ thể là **Operation Log (OpLog)**.
+  - Tất cả các thao tác ghi được ghi vào OpLog, được đồng bộ hóa với đĩa định kỳ (mặc định mỗi 60 giây), đảm bảo rằng các giao dịch đã xác nhận sẽ tồn tại sau sự cố.
+  - Ví dụ: Sau khi một giao dịch chuyển tiền được xác nhận, dữ liệu sẽ được lưu trữ an toàn, ngay cả khi máy chủ bị mất điện.
+
+## Các phương pháp xử lý tính nhất quán trong MongoDB
+MongoDB cung cấp nhiều phương pháp để xử lý tính nhất quán, mỗi phương pháp có ưu và nhược điểm riêng:
+
+| **Phương pháp** | **Mô tả** | **Ảnh hưởng hiệu suất** | **Trường hợp sử dụng** |
+|------------------|-----------|-------------------------|-----------------------|
+| [Transactions](https://www.mongodb.com/docs/manual/core/transactions/) | Cập nhật nhiều bộ sưu tập trong một thao tác nguyên tử duy nhất. | Có thể cao do tranh chấp đọc (read contention). | Khi ứng dụng cần trả về dữ liệu cập nhật ngay lập tức và có thể chấp nhận ảnh hưởng hiệu suất trong trường hợp đọc nặng. |
+| [Embedding Related Data](https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/) | Lưu trữ dữ liệu liên quan trong một tài liệu duy nhất. | Thấp đến trung bình, tùy thuộc vào kích thước tài liệu và index. | Khi dữ liệu liên quan luôn được đọc/cập nhật cùng nhau, đơn giản hóa thiết kế schema và tránh thao tác `$lookup`. |
+| [Atlas Database Triggers](https://www.mongodb.com/docs/atlas/app-services/triggers/database-triggers/) | Tự động cập nhật một bộ sưu tập khi bộ sưu tập khác được cập nhật. | Thấp đến trung bình, có thể có độ trễ. | Khi ứng dụng có thể chấp nhận dữ liệu hơi cũ và người dùng có thể thấy dữ liệu chưa cập nhật trong thời gian ngắn. |
+
+## Cách sử dụng giao dịch trong MongoDB
+Để thực hiện một giao dịch trong MongoDB, bạn cần sử dụng một phiên (session) và các phương thức giao dịch. Dưới đây là quy trình cơ bản:
+
+1. **Bắt đầu phiên**: Sử dụng `startSession()` để tạo một phiên.
+2. **Bắt đầu giao dịch**: Gọi `startTransaction()` trong phiên.
+3. **Thực hiện thao tác**: Thực hiện các thao tác đọc và ghi trong phiên giao dịch.
+4. **Xác nhận hoặc hủy**: Sử dụng `commitTransaction()` để xác nhận hoặc `abortTransaction()` để hủy giao dịch.
+
+Ví dụ mã JavaScript (sử dụng MongoDB Node.js driver):
+
+```javascript
+const { MongoClient } = require("mongodb");
+
+async function run() {
+    const client = new MongoClient("mongodb://localhost:27017");
+    try {
+        await client.connect();
+        const db = client.db("bank");
+        const session = client.startSession();
+        try {
+            await session.withTransaction(async () => {
+                const accounts = db.collection("accounts");
+                await accounts.updateOne(
+                    { account_id: "A" },
+                    { $inc: { balance: -1000 } },
+                    { session }
+                );
+                await accounts.updateOne(
+                    { account_id: "B" },
+                    { $inc: { balance: 1000 } },
+                    { session }
+                );
+            });
+            console.log("Giao dịch thành công!");
+        } finally {
+            await session.endSession();
+        }
+    } finally {
+        await client.close();
+    }
+}
+run().catch(console.dir);
+```
+
+## Các thực hành tốt nhất khi sử dụng giao dịch
+- **Chia nhỏ giao dịch dài**: Tránh các giao dịch kéo dài bằng cách chia thành các giao dịch nhỏ hơn để tránh hết thời gian chờ (mặc định 60 giây, có thể mở rộng).
+- **Giới hạn số lượng tài liệu**: Giới hạn giao dịch ở mức 1.000 tài liệu được sửa đổi để duy trì hiệu suất.
+- **Sử dụng read/write concern phù hợp**: Từ MongoDB 5.0, write concern mặc định là "majority", đảm bảo tính nhất quán cao.
+- **Xử lý lỗi và thử lại**: Thêm cơ chế xử lý lỗi và thử lại cho các lỗi tạm thời (transient errors).
+- **Cân nhắc hiệu suất**: Giao dịch trên nhiều phân mảnh (shards) có thể tốn kém, vì vậy hãy sử dụng cẩn thận.
+
+## Các trường hợp sử dụng giao dịch đa tài liệu
+- **Ứng dụng ngân hàng**: Đảm bảo chuyển tiền nguyên tử giữa các tài khoản ([Banking Example](https://github.com/mongodb-developer/nodejs-quickstart/blob/master/transaction-bankingexample.js)).
+- **Xử lý thanh toán**: Quản lý các giao dịch liên quan đến nhiều bước hoặc bộ sưu tập.
+- **Nền tảng giao dịch**: Duy trì tính nhất quán cho các giao dịch phức tạp trên nhiều bản ghi.
+- **Hệ thống chuỗi cung ứng và đặt chỗ**: Chuyển giao quyền sở hữu hoặc cập nhật kho trên các bộ sưu tập khác nhau.
+- **Hệ thống thanh toán**: Đồng bộ hóa các bản ghi chi tiết và tóm tắt.
+
+## Hạn chế và cân nhắc
+- **Hiệu suất**: Giao dịch đa tài liệu có thể làm giảm hiệu suất, đặc biệt trong các cụm phân tán hoặc khi có tranh chấp đọc/ghi cao.
+- **Mô hình dữ liệu**: Mô hình tài liệu của MongoDB khuyến khích nhúng dữ liệu liên quan vào một tài liệu duy nhất, điều này có thể giảm nhu cầu sử dụng giao dịch trong nhiều trường hợp.
+- **Thay thế**: Trong một số trường hợp, nhúng dữ liệu hoặc sử dụng Atlas Database Triggers có thể là lựa chọn hiệu quả hơn về hiệu suất so với giao dịch.
+
+## Kết luận
+Hỗ trợ giao dịch ACID của MongoDB cung cấp cho các nhà phát triển công cụ để đảm bảo tính toàn vẹn dữ liệu trong các thao tác phức tạp, đa tài liệu. Bằng cách hiểu và áp dụng các nguyên tắc của Atomicity, Consistency, Isolation, và Durability, cùng với các thực hành tốt nhất và phương pháp được cung cấp bởi MongoDB, các nhà phát triển có thể xây dựng các ứng dụng mạnh mẽ và đáng tin cậy. Tuy nhiên, cần cân nhắc cẩn thận giữa tính toàn vẹn dữ liệu và hiệu suất khi sử dụng giao dịch, đặc biệt trong các hệ thống quy mô lớn.
+
+## Key Citations
+- [MongoDB ACID Transactions Overview](https://www.mongodb.com/resources/basics/databases/acid-transactions)
+- [MongoDB Official Transactions Documentation](https://www.mongodb.com/docs/manual/core/transactions/)
+- [MongoDB Multi-Document ACID Transactions](https://www.mongodb.com/products/capabilities/transactions)
+- [MongoDB Data Modeling: Embedding vs References](https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/)
+- [Atlas Database Triggers Documentation](https://www.mongodb.com/docs/atlas/app-services/triggers/database-triggers/)
+- [Node.js Transaction Banking Example](https://github.com/mongodb-developer/nodejs-quickstart/blob/master/transaction-bankingexample.js)
+
+
+# Giao dịch Đa Tài Liệu trong MongoDB
+
+- Giao dịch đa tài liệu đảm bảo tính toàn vẹn dữ liệu khi cập nhật nhiều tài liệu.
+- Thường được sử dụng trong các ứng dụng như ngân hàng hoặc kinh doanh.
+- Có thể thực hiện hoặc hủy giao dịch để duy trì trạng thái cơ sở dữ liệu.
+- Yêu cầu MongoDB phiên bản 4.0 trở lên với replica set hoặc sharded cluster.
+
+## Sử dụng Giao dịch
+
+Để thực hiện một giao dịch đa tài liệu trong MongoDB, bạn cần tạo một phiên (session), bắt đầu giao dịch, thực hiện các thao tác cơ sở dữ liệu, và sau đó xác nhận (commit) giao dịch. Các bước này đảm bảo rằng tất cả các thao tác được thực hiện như một đơn vị nguyên tử, nghĩa là hoặc tất cả thành công hoặc không có thay đổi nào được áp dụng.
+
+**Các bước thực hiện**:
+
+1. **Bắt đầu phiên (session)**: Tạo một phiên để quản lý giao dịch.
+2. **Bắt đầu giao dịch**: Khởi động giao dịch trong phiên.
+3. **Lấy collection**: Xác định cơ sở dữ liệu và collection để thực hiện thao tác.
+4. **Thực hiện thao tác**: Thêm các thao tác như cập nhật hoặc chèn tài liệu.
+5. **Xác nhận giao dịch**: Lưu tất cả các thay đổi bằng cách xác nhận giao dịch.
+
+**Ví dụ mã**:
+
+```javascript
+const session = db.getMongo().startSession()
+session.startTransaction()
+const account = session.getDatabase('bank').getCollection('accounts')
+account.updateOne(
+    { account_id: "A" },
+    { $inc: { balance: -100 } },
+    { session }
+)
+account.updateOne(
+    { account_id: "B" },
+    { $inc: { balance: 100 } },
+    { session }
+)
+session.commitTransaction()
+session.endSession()
+```
+
+Trong ví dụ này, giao dịch chuyển 100 đơn vị từ tài khoản A sang tài khoản B. Nếu cả hai thao tác thành công, giao dịch được xác nhận; nếu không, không có thay đổi nào được lưu.
+
+## Hủy Giao dịch
+
+Nếu bạn cần hoàn tác các thay đổi trước khi giao dịch hoàn tất, bạn có thể hủy (abort) giao dịch. Điều này sẽ khôi phục cơ sở dữ liệu về trạng thái ban đầu trước khi giao dịch bắt đầu, đảm bảo không có thay đổi nào được áp dụng.
+
+**Các bước hủy**:
+
+1. **Bắt đầu phiên và giao dịch**: Tương tự như khi sử dụng giao dịch.
+2. **Thực hiện thao tác**: Thêm các thao tác cơ sở dữ liệu.
+3. **Hủy giao dịch**: Sử dụng `abortTransaction()` để hủy các thay đổi.
+
+**Ví dụ mã**:
+
+```javascript
+const session = db.getMongo().startSession()
+session.startTransaction()
+const account = session.getDatabase('bank').getCollection('accounts')
+account.updateOne(
+    { account_id: "A" },
+    { $inc: { balance: -100 } },
+    { session }
+)
+// Giả sử có lỗi xảy ra
+session.abortTransaction()
+session.endSession()
+```
+
+Trong trường hợp này, nếu có lỗi hoặc bạn quyết định không tiếp tục, `abortTransaction()` đảm bảo rằng số dư tài khoản A không bị thay đổi.
+
+---
+
+# Báo cáo chi tiết về Giao dịch Đa Tài Liệu trong MongoDB
+
+## Tổng quan
+
+Giao dịch đa tài liệu trong MongoDB cho phép thực hiện nhiều thao tác trên các tài liệu, bộ sưu tập, hoặc thậm chí các phân mảnh (shards) khác nhau như một đơn vị nguyên tử duy nhất. Điều này đảm bảo rằng hoặc tất cả các thao tác thành công, hoặc không có thay đổi nào được áp dụng, duy trì tính toàn vẹn dữ liệu. Được giới thiệu từ phiên bản 4.0, tính năng này rất quan trọng cho các ứng dụng như ngân hàng, thương mại điện tử, hoặc quản lý kho, nơi các cập nhật một phần có thể dẫn đến trạng thái không nhất quán.
+
+Giao dịch đa tài liệu tuân thủ các thuộc tính **ACID**:
+
+- **Atomicity** (Tính nguyên tử): Tất cả các thao tác trong giao dịch được thực hiện như một đơn vị duy nhất.
+- **Consistency** (Tính nhất quán): Giao dịch đưa cơ sở dữ liệu từ trạng thái hợp lệ này sang trạng thái hợp lệ khác.
+- **Isolation** (Tính cô lập): Các giao dịch được cô lập, không thấy trạng thái trung gian của nhau.
+- **Durability** (Tính bền vững): Các thay đổi được xác nhận sẽ được lưu vĩnh viễn, ngay cả khi hệ thống gặp sự cố.
+
+## Khi nào nên sử dụng
+
+Giao dịch đa tài liệu thường được sử dụng trong các ứng dụng yêu cầu trao đổi giá trị giữa các bên, chẳng hạn như:
+
+- **Ngân hàng**: Chuyển tiền giữa các tài khoản.
+- **Thương mại điện tử**: Cập nhật đơn hàng và kho hàng đồng thời.
+- **Quản lý kho**: Điều chỉnh số lượng tồn kho trên nhiều bản ghi.
+
+Tuy nhiên, do giao dịch có thể ảnh hưởng đến hiệu suất, bạn nên cân nhắc nhúng dữ liệu liên quan vào một tài liệu duy nhất nếu có thể, vì các thao tác trên một tài liệu luôn có tính nguyên tử trong MongoDB.
+
+## Sử dụng Giao dịch
+
+Để thực hiện một giao dịch đa tài liệu, bạn cần sử dụng một phiên (session) để quản lý các thao tác. Dưới đây là các bước chi tiết:
+
+1. **Tạo phiên**:
+   ```javascript
+   const session = db.getMongo().startSession()
+   ```
+   Phiên là một cơ chế để nhóm các thao tác giao dịch lại với nhau.
+
+2. **Bắt đầu giao dịch**:
+   ```javascript
+   session.startTransaction()
+   ```
+   Điều này khởi động giao dịch, đảm bảo rằng tất cả các thao tác tiếp theo được thực hiện như một đơn vị nguyên tử.
+
+3. **Lấy collection**:
+   ```javascript
+   const account = session.getDatabase('bank').getCollection('accounts')
+   ```
+   Xác định cơ sở dữ liệu và collection mà bạn muốn thao tác.
+
+4. **Thực hiện thao tác**:
+   Các thao tác như `insertOne`, `updateOne`, hoặc `deleteOne` có thể được thực hiện. Đảm bảo bao gồm tham số `{ session }` để liên kết thao tác với giao dịch.
+   ```javascript
+   account.updateOne(
+       { account_id: "A" },
+       { $inc: { balance: -100 } },
+       { session }
+   )
+   account.updateOne(
+       { account_id: "B" },
+       { $inc: { balance: 100 } },
+       { session }
+   )
+   ```
+
+5. **Xác nhận giao dịch**:
+   ```javascript
+   session.commitTransaction()
+   ```
+   Nếu tất cả các thao tác thành công, `commitTransaction()` lưu các thay đổi vào cơ sở dữ liệu.
+
+6. **Kết thúc phiên**:
+   ```javascript
+   session.endSession()
+   ```
+   Luôn gọi `endSession()` để giải phóng tài nguyên, bất kể giao dịch thành công hay thất bại.
+
+**Ví dụ đầy đủ**:
+
+```javascript
+const session = db.getMongo().startSession()
+try {
+    session.startTransaction()
+    const account = session.getDatabase('bank').getCollection('accounts')
+    account.updateOne(
+        { account_id: "A" },
+        { $inc: { balance: -100 } },
+        { session }
+    )
+    account.updateOne(
+        { account_id: "B" },
+        { $inc: { balance: 100 } },
+        { session }
+    )
+    session.commitTransaction()
+    console.log("Giao dịch thành công!")
+} catch (error) {
+    console.log("Lỗi giao dịch:", error)
+    session.abortTransaction()
+} finally {
+    session.endSession()
+}
+```
+
+Trong ví dụ này, giao dịch chuyển 100 đơn vị từ tài khoản A sang tài khoản B. Nếu cả hai thao tác cập nhật thành công, giao dịch được xác nhận. Nếu có lỗi, giao dịch sẽ bị hủy.
+
+## Hủy Giao dịch
+
+Nếu bạn cần hoàn tác các thay đổi trong giao dịch, bạn có thể gọi `abortTransaction()`. Điều này sẽ khôi phục cơ sở dữ liệu về trạng thái trước khi giao dịch bắt đầu.
+
+**Các bước chi tiết**:
+
+1. **Tạo phiên và bắt đầu giao dịch**:
+   ```javascript
+   const session = db.getMongo().startSession()
+   session.startTransaction()
+   ```
+
+2. **Thực hiện thao tác**:
+   ```javascript
+   const account = session.getDatabase('bank').getCollection('accounts')
+   account.updateOne(
+       { account_id: "A" },
+       { $inc: { balance: -100 } },
+       { session }
+   )
+   ```
+
+3. **Hủy giao dịch**:
+   ```javascript
+   session.abortTransaction()
+   ```
+   Nếu bạn quyết định không tiếp tục (ví dụ, do lỗi hoặc điều kiện không thỏa mãn), `abortTransaction()` đảm bảo rằng không có thay đổi nào được lưu.
+
+4. **Kết thúc phiên**:
+   ```javascript
+   session.endSession()
+   ```
+
+**Ví dụ đầy đủ**:
+
+```javascript
+const session = db.getMongo().startSession()
+try {
+    session.startTransaction()
+    const account = session.getDatabase('bank').getCollection('accounts')
+    account.updateOne(
+        { account_id: "A" },
+        { $inc: { balance: -100 } },
+        { session }
+    )
+    // Giả sử có lỗi hoặc điều kiện không thỏa mãn
+    throw new Error("Không đủ số dư")
+} catch (error) {
+    console.log("Hủy giao dịch do:", error)
+    session.abortTransaction()
+} finally {
+    session.endSession()
+}
+```
+
+Trong ví dụ này, nếu tài khoản A không đủ số dư, giao dịch sẽ bị hủy, và số dư của tài khoản không thay đổi.
+
+## Các thực hành tốt nhất
+
+Để sử dụng giao dịch đa tài liệu hiệu quả, hãy tuân theo các thực hành sau:
+
+- **Giữ giao dịch ngắn gọn**: Hạn chế số lượng thao tác trong một giao dịch để giảm thời gian khóa và cải thiện hiệu suất. MongoDB giới hạn giao dịch ở mức 1.000 tài liệu được sửa đổi để duy trì hiệu suất.
+- **Xử lý lỗi**: Luôn bao gồm cơ chế xử lý lỗi để hủy giao dịch nếu cần. Sử dụng `try-catch` để bắt các lỗi và gọi `abortTransaction()` khi thích hợp.
+- **Kết thúc phiên**: Đảm bảo gọi `session.endSession()` trong khối `finally` để giải phóng tài nguyên, ngay cả khi giao dịch thất bại.
+- **Sử dụng read/write concern phù hợp**: Từ MongoDB 5.0, write concern mặc định là "majority", đảm bảo tính nhất quán cao. Bạn có thể điều chỉnh tùy thuộc vào yêu cầu ứng dụng.
+- **Cân nhắc hiệu suất**: Giao dịch trên các cụm phân tán (sharded clusters) có thể tốn kém hơn. Nếu có thể, nhúng dữ liệu liên quan vào một tài liệu duy nhất để tránh sử dụng giao dịch.
+- **Thử lại giao dịch**: Trong trường hợp lỗi tạm thời (transient errors), thêm logic thử lại giao dịch để tăng độ tin cậy.
+
+## Hạn chế
+
+Giao dịch đa tài liệu trong MongoDB có một số hạn chế cần lưu ý:
+
+- **Yêu cầu triển khai**: Giao dịch chỉ được hỗ trợ trên replica sets hoặc sharded clusters, không áp dụng cho các phiên bản độc lập.
+- **Hiệu suất**: Giao dịch có thể làm giảm hiệu suất, đặc biệt khi liên quan đến nhiều tài liệu hoặc phân mảnh.
+- **Thời gian chờ**: Giao dịch có thời gian chờ mặc định là 60 giây, có thể được mở rộng nhưng cần được quản lý cẩn thận.
+- **Thao tác không được hỗ trợ**: Một số thao tác, như thao tác trên capped collections hoặc một số lệnh quản trị, không thể được sử dụng trong giao dịch.
+
+## Các trường hợp sử dụng
+
+Giao dịch đa tài liệu rất hữu ích trong các tình huống sau:
+
+| **Trường hợp sử dụng** | **Mô tả** | **Ví dụ** |
+|-------------------------|-----------|-----------|
+| Ngân hàng | Chuyển tiền giữa các tài khoản, đảm bảo số dư được cập nhật đồng thời. | Chuyển 100 đơn vị từ tài khoản A sang tài khoản B. |
+| Thương mại điện tử | Cập nhật đơn hàng và kho hàng trong một giao dịch. | Xử lý đơn hàng và giảm số lượng tồn kho. |
+| Quản lý kho | Điều chỉnh số lượng tồn kho trên nhiều bản ghi. | Cập nhật kho khi chuyển hàng giữa các kho. |
+| Hệ thống thanh toán | Đồng bộ hóa chi tiết giao dịch và tóm tắt tài khoản. | Ghi lại giao dịch và cập nhật số dư tài khoản. |
+
+## Kết luận
+
+Giao dịch đa tài liệu trong MongoDB cung cấp một công cụ mạnh mẽ để đảm bảo tính toàn vẹn dữ liệu trong các thao tác phức tạp, đặc biệt trong các ứng dụng yêu cầu trao đổi giá trị như ngân hàng hoặc kinh doanh. Bằng cách sử dụng các phiên, bạn có thể thực hiện nhiều thao tác như một đơn vị nguyên tử, với tùy chọn xác nhận hoặc hủy giao dịch tùy thuộc vào kết quả. Tuy nhiên, để tối ưu hóa hiệu suất, hãy sử dụng giao dịch một cách có chọn lọc và cân nhắc các phương pháp thay thế như nhúng dữ liệu khi phù hợp. Với các thực hành tốt nhất và xử lý lỗi cẩn thận, bạn có thể xây dựng các ứng dụng đáng tin cậy và hiệu quả với MongoDB.
+
+## Key Citations
+
+- [MongoDB Transactions Documentation](https://www.mongodb.com/docs/manual/core/transactions/)
+- [MongoDB Multi-Document ACID Transactions](https://www.mongodb.com/docs/manual/core/transactions/)
+- [How To Use Transactions in MongoDB | DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-use-transactions-in-mongodb)
+- [An Overview of Multi-Document ACID Transactions in MongoDB | Severalnines](https://severalnines.com/blog/overview-multi-document-acid-transactions-mongodb-and-how-use-them/)
