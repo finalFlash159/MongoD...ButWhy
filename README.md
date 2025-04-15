@@ -2923,3 +2923,181 @@ with client.start_session() as session:
 ### Kết luận
 
 Trong đoạn code MongoDB, `callback_wrapper` là một wrapper đơn giản giúp điều chỉnh chữ ký của hàm `callback` để phù hợp với yêu cầu của `with_transaction`. Nó đóng vai trò như một cầu nối, cho phép truyền các tham số bổ sung mà không làm thay đổi hàm chính. Trong Python nói chung, wrapper là một công cụ mạnh mẽ để mở rộng chức năng của hàm, thường được sử dụng thông qua closures hoặc decorators. Hiểu cách sử dụng wrapper và các lựa chọn thay thế như lambda giúp bạn viết mã linh hoạt, dễ bảo trì, và phù hợp với các tình huống thực tế như giao dịch cơ sở dữ liệu.
+
+# Sử dụng Aggregation Stages trong MongoDB với Python
+
+Phần này hướng dẫn cách sử dụng các giai đoạn **aggregation** (`$match`, `$group`, `$sort`, `$project`) trong MongoDB bằng thư viện **PyMongo** để xử lý và biến đổi dữ liệu.
+
+## Sử dụng `$match` và `$group`
+
+### Giai đoạn `$match`
+
+- **Mục đích**: Lọc các tài liệu dựa trên điều kiện truy vấn, chỉ truyền các tài liệu khớp sang giai đoạn tiếp theo.
+- **Vị trí**: Nên đặt sớm trong pipeline để giảm số lượng tài liệu cần xử lý ở các giai đoạn sau.
+- **Cú pháp**: Nhận một tài liệu xác định điều kiện truy vấn.
+
+**Ví dụ**:
+
+```python
+# Lọc các tài khoản có số dư dưới 1000
+select_by_balance = {"$match": {"balance": {"$lt": 1000}}}
+```
+
+### Giai đoạn `$group`
+
+- **Mục đích**: Nhóm các tài liệu theo một khóa nhóm (group key) và tính toán các giá trị tổng hợp (ví dụ: trung bình, tổng, đếm).
+- **Yêu cầu**: Phải có trường `_id` xác định khóa nhóm, sử dụng `$` để tham chiếu trường.
+- **Cú pháp**: Có thể bao gồm các trường tính toán bằng các toán tử tích lũy như `$avg`, `$sum`, `$count`.
+
+**Ví dụ**:
+
+```python
+# Nhóm tài liệu theo loại tài khoản và tính số dư trung bình
+separate_by_account_calculate_avg_balance = {
+    "$group": {"_id": "$account_type", "avg_balance": {"$avg": "$balance"}}
+}
+```
+
+### Ví dụ Aggregation Pipeline với `$match` và `$group`
+
+Pipeline dưới đây lọc các tài khoản có số dư dưới 1000, sau đó nhóm theo loại tài khoản và tính số dư trung bình.
+
+```python
+from pymongo import MongoClient
+from pprint import pprint
+
+# Kết nối tới MongoDB
+client = MongoClient("mongodb://localhost:27017")
+
+# Lấy tham chiếu tới database 'bank'
+db = client.bank
+
+# Lấy tham chiếu tới collection 'accounts'
+accounts_collection = db.accounts
+
+# Lọc các tài khoản có số dư dưới 1000
+select_by_balance = {"$match": {"balance": {"$lt": 1000}}}
+
+# Nhóm theo loại tài khoản và tính số dư trung bình
+separate_by_account_calculate_avg_balance = {
+    "$group": {"_id": "$account_type", "avg_balance": {"$avg": "$balance"}}
+}
+
+# Tạo pipeline
+pipeline = [
+    select_by_balance,
+    separate_by_account_calculate_avg_balance,
+]
+
+# Thực hiện aggregation
+results = accounts_collection.aggregate(pipeline)
+
+# In kết quả
+print()
+print("Số dư trung bình của các tài khoản checking và savings có số dư dưới 1000:", "\n")
+for item in results:
+    pprint(item)
+
+# Đóng kết nối
+client.close()
+```
+
+## Sử dụng `$sort` và `$project`
+
+### Giai đoạn `$sort`
+
+- **Mục đích**: Sắp xếp các tài liệu theo thứ tự tăng dần hoặc giảm dần dựa trên một hoặc nhiều trường.
+- **Cú pháp**: Nhận một tài liệu xác định trường cần sắp xếp và thứ tự (`1` cho tăng dần, `-1` cho giảm dần).
+
+**Ví dụ**:
+
+```python
+# Sắp xếp tài liệu theo số dư từ cao đến thấp
+organize_by_original_balance = {"$sort": {"balance": -1}}
+```
+
+### Giai đoạn `$project`
+
+- **Mục đích**: Chỉ định các trường trả về trong kết quả, có thể bao gồm, loại trừ, hoặc tạo trường mới.
+- **Cách dùng**:
+  - Đặt trường là `1` để bao gồm, `0` để loại trừ.
+  - Tạo trường mới bằng cách sử dụng biểu thức, ví dụ: tính toán giá trị mới từ các trường hiện có.
+- **Vị trí**: Thường đặt ở cuối pipeline để định dạng kết quả cuối cùng.
+
+**Ví dụ**:
+
+```python
+# Trả về loại tài khoản, số dư, và số dư quy đổi sang GBP, loại bỏ _id
+return_specified_fields = {
+    "$project": {
+        "account_type": 1,
+        "balance": 1,
+        "gbp_balance": {"$divide": ["$balance", conversion_rate_usd_to_gbp]},
+        "_id": 0,
+    }
+}
+```
+
+### Ví dụ Aggregation Pipeline với `$match`, `$sort`, và `$project`
+
+Pipeline dưới đây lọc các tài khoản checking có số dư trên 1500, sắp xếp theo số dư giảm dần, và trả về loại tài khoản, số dư gốc, cùng số dư quy đổi sang GBP.
+
+```python
+from pymongo import MongoClient
+from pprint import pprint
+
+# Kết nối tới MongoDB
+client = MongoClient("mongodb://localhost:27017")
+
+# Lấy tham chiếu tới database 'bank'
+db = client.bank
+
+# Lấy tham chiếu tới collection 'accounts'
+accounts_collection = db.accounts
+
+# Tỷ giá quy đổi USD sang GBP
+conversion_rate_usd_to_gbp = 1.3
+
+# Lọc các tài khoản checking có số dư trên 1500
+select_accounts = {"$match": {"account_type": "checking", "balance": {"$gt": 1500}}}
+
+# Sắp xếp theo số dư từ cao đến thấp
+organize_by_original_balance = {"$sort": {"balance": -1}}
+
+# Trả về loại tài khoản, số dư, và số dư quy đổi sang GBP
+return_specified_fields = {
+    "$project": {
+        "account_type": 1,
+        "balance": 1,
+        "gbp_balance": {"$divide": ["$balance", conversion_rate_usd_to_gbp]},
+        "_id": 0,
+    }
+}
+
+# Tạo pipeline
+pipeline = [
+    select_accounts,
+    organize_by_original_balance,
+    return_specified_fields,
+]
+
+# Thực hiện aggregation
+results = accounts_collection.aggregate(pipeline)
+
+# In kết quả
+print(
+    "Loại tài khoản, số dư gốc và số dư quy đổi sang GBP của các tài khoản checking có số dư trên 1500, "
+    "sắp xếp từ cao đến thấp:", "\n"
+)
+for item in results:
+    pprint(item)
+
+# Đóng kết nối
+client.close()
+```
+
+## Lưu ý khi sử dụng Aggregation Pipeline
+
+- **Tối ưu hóa pipeline**: Đặt `$match` sớm để giảm số lượng tài liệu xử lý, và `$project` ở cuối để định dạng kết quả.
+- **Hiệu suất**: Aggregation trên tập dữ liệu lớn có thể tốn tài nguyên, hãy đảm bảo sử dụng index phù hợp.
+- **Kiểm tra kết quả**: Sử dụng `pprint` hoặc các công cụ trực quan hóa để kiểm tra dữ liệu trả về.
