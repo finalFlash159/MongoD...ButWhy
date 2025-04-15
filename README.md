@@ -18,7 +18,7 @@ MongoDB stores data records as BSON documents. BSON is a binary representation o
 ![](https://www.mongodb.com/docs/manual/images/crud-annotated-document.svg)
 
 ### Document Structure
-```json
+```bash
 {
    field1: value1,
    field2: value2,
@@ -29,7 +29,7 @@ MongoDB stores data records as BSON documents. BSON is a binary representation o
 ```
 
 The value of a field can be any of the BSON data types, including other documents, arrays, and arrays of documents. For example, the following document contains values of varying types:
-```json
+```bash
 var mydoc = {
                _id: ObjectId("5099803df3f4948bd2f98391"),
                name: { first: "Alan", last: "Turing" },
@@ -206,7 +206,7 @@ MongoDB sử dụng **dot notation** để truy cập các phần tử của m�
 
 Giả sử bạn có một document với trường như sau:
 
-```json
+```bash
 {
   ...
   "contribs": [ "Turing machine", "Turing test", "Turingery" ],
