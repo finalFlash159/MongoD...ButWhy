@@ -6,11 +6,11 @@ import questions3 from './questions/questions3.json';
 // Map of exam types to question data
 export const examData = {
   default: {
-    title: "Default Exam",
+    title: "MongoDB Exam 1",
     questions: defaultQuestions
   },
   1: {
-    title: "MongoDB CRUD Operations Exam",
+    title: "MongoDB Exam 2",
     questions: questions1
   },
   2: {
